@@ -30,11 +30,14 @@ typedef struct {
 
 #define DA_CREATE_TINFO(type, dtor_ptr) \
 ((da_type_info_t){.size = sizeof(type), .dtor = (dtor_ptr)})
+#define DA_CREATE_VAR(name, type, dtor_ptr) \
+da_t name = {0}; name.info = DA_CREATE_TINFO(type, dtor_ptr)
 
 typedef const void* da_imm_t;
 
 // Function declarations
 
+DA_DEF void* da_access(da_t* da, size_t index);
 DA_DEF void da_push_back(da_t* da, const void* item);
 DA_DEF void da_push_back_many(da_t* da, const void* items, size_t items_count);
 DA_DEF void da_clear(da_t* da);
@@ -81,7 +84,16 @@ static void da_detail_has_n(da_t* da, size_t n) {
     da_detail_realloc(da);
 }
 
+static void* da_detail_access(da_t* da, size_t index) {
+    return (char*)da->items + index * da->info.size;
+}
+
 // General implementations
+
+void* da_access(da_t* da, size_t index) {
+    assert(index < da->count && "Out of range");
+    return da_detail_access(da, index);
+}
 
 void da_push_back(da_t* da, const void* item) {
     da_insert(da, item, da->count);
@@ -98,7 +110,7 @@ void da_push_back_many(da_t* da, const void* items, size_t items_count) {
 void da_clear(da_t* da) {
     if (da->info.dtor != NULL)
         for (size_t i = 0; i < da->count; i++)
-            da->info.dtor((char*)da->items + i * da->info.size);
+            da->info.dtor(da_detail_access(da, i));
     da->count = 0;
 }
 
@@ -112,7 +124,7 @@ void da_destroy(da_t* da) {
 void da_insert(da_t* da, const void* item, size_t index) {
     assert(index <= da->count && "Out of range");
     da_detail_has_one(da);
-    char* inserted = (char*)da->items + index * da->info.size;
+    char* inserted = da_detail_access(da, index);
     memmove(inserted + da->info.size, inserted,
         (da->count - index) * da->info.size);
     memcpy(inserted, item, da->info.size);
@@ -128,8 +140,8 @@ void da_insert_imm(da_t* da, da_imm_t value, size_t index) {
 void da_insert_many(da_t* da, const void* items, size_t items_count, size_t index) {
     assert(index <= da->count && "Out of range");
     da_detail_has_n(da, items_count);
-    char* first = (char*)da->items + index * da->info.size;
-    char* last = first + items_count * da->info.size;
+    char* first = da_detail_access(da, index);
+    char* last  = da_detail_access(da, index + items_count);
     memmove(last, first, (da->count - index) * da->info.size);
     memcpy(first, items, items_count * da->info.size);
     da->count += items_count;
@@ -137,8 +149,7 @@ void da_insert_many(da_t* da, const void* items, size_t items_count, size_t inde
 
 void da_remove(da_t* da, size_t index) {
     assert(index < da->count && "Out of range");
-    char* removed = (char*)da->items
-        + index * da->info.size;
+    char* removed = da_detail_access(da, index);
     if (da->info.dtor != NULL)
         da->info.dtor(removed);
     memmove(removed, removed + da->info.size,
@@ -149,11 +160,11 @@ void da_remove(da_t* da, size_t index) {
 void da_remove_many(da_t* da, size_t i, size_t j) {
     assert(i <= da->count && j <= da->count && "Out of range");
     assert(i <= j && "Invalid range");
-    char* first = (char*)da->items + i * da->info.size;
-    char* last  = (char*)da->items + j * da->info.size;
+    char* first = da_detail_access(da, i);
+    char* last  = da_detail_access(da, j);
     if (da->info.dtor != NULL)
-        for (char* cur = first; cur < last; cur += da->info.size)
-            da->info.dtor(cur);
+        for (size_t k = i; k < j; k++)
+            da->info.dtor(da_detail_access(da, k));
     memmove(first, last, da->info.size * (da->count - j));
     da->count -= j - i;
 }

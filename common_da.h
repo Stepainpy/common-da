@@ -139,6 +139,7 @@ void da_insert_imm(da_t* da, da_imm_t value, size_t index) {
 
 void da_insert_many(da_t* da, const void* items, size_t items_count, size_t index) {
     assert(index <= da->count && "Out of range");
+    if (items_count == 0) return;
     da_detail_has_n(da, items_count);
     char* first = da_detail_access(da, index);
     char* last  = da_detail_access(da, index + items_count);
@@ -160,6 +161,7 @@ void da_remove(da_t* da, size_t index) {
 void da_remove_many(da_t* da, size_t i, size_t j) {
     assert(i <= da->count && j <= da->count && "Out of range");
     assert(i <= j && "Invalid range");
+    if (j - i == 0) return;
     char* first = da_detail_access(da, i);
     char* last  = da_detail_access(da, j);
     if (da->info.dtor != NULL)

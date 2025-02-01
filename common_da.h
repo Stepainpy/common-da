@@ -38,6 +38,8 @@ typedef const void* da_imm_t;
 // Function declarations
 
 DA_DEF void* da_at(da_t* da, size_t index);
+DA_DEF void* da_front(da_t* da);
+DA_DEF void* da_back(da_t* da);
 DA_DEF void da_push_back(da_t* da, const void* item);
 DA_DEF void da_push_back_many(da_t* da, const void* items, size_t items_count);
 DA_DEF void da_clear(da_t* da);
@@ -93,6 +95,18 @@ static void* da_detail_at(da_t* da, size_t index) {
 void* da_at(da_t* da, size_t index) {
     assert(index < da->count && "Out of range");
     return da_detail_at(da, index);
+}
+
+void* da_front(da_t* da) {
+    if (da->count == 0)
+        return NULL;
+    return da_detail_at(da, 0);
+}
+
+void* da_back(da_t* da) {
+    if (da->count == 0)
+        return NULL;
+    return da_detail_at(da, da->count - 1);
 }
 
 void da_push_back(da_t* da, const void* item) {

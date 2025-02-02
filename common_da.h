@@ -56,6 +56,8 @@ DA_DEF void       da_clear(da_t* da);
 DA_DEF void       da_destroy(da_t* da);
 DA_DEF da_error_t da_insert(da_t* da, const void* item, size_t index);
 DA_DEF da_error_t da_insert_many(da_t* da, const void* items, size_t items_count, size_t index);
+DA_DEF da_error_t da_pop_back(da_t* da);
+DA_DEF da_error_t da_pop_back_many(da_t* da, size_t pop_count);
 DA_DEF da_error_t da_remove(da_t* da, size_t index);
 DA_DEF da_error_t da_remove_many(da_t* da, size_t i, size_t j);
 DA_DEF da_error_t da_reserve(da_t* da, size_t new_cap);
@@ -195,6 +197,14 @@ da_error_t da_insert_many(da_t* da, const void* items, size_t items_count, size_
     da->count += items_count;
 
     return dae_success;
+}
+
+da_error_t da_pop_back(da_t* da) {
+    return da_remove(da, da->count - 1);
+}
+
+da_error_t da_pop_back_many(da_t* da, size_t pop_count) {
+    return da_remove_many(da, da->count - pop_count, da->count);
 }
 
 da_error_t da_remove(da_t* da, size_t index) {

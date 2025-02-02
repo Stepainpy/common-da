@@ -164,8 +164,9 @@ da_error_t da_insert(da_t* da, const void* item, size_t index) {
         return dae_no_memory;
 
     char* inserted = da_detail_at(da, index);
-    memmove(inserted + da->info.size, inserted,
-        (da->count - index) * da->info.size);
+    if (index < da->count)
+        memmove(inserted + da->info.size, inserted,
+            (da->count - index) * da->info.size);
     memcpy(inserted, item, da->info.size);
     da->count += 1;
 
@@ -188,7 +189,8 @@ da_error_t da_insert_many(da_t* da, const void* items, size_t items_count, size_
 
     char* first = da_detail_at(da, index);
     char* last  = da_detail_at(da, index + items_count);
-    memmove(last, first, (da->count - index) * da->info.size);
+    if (index < da->count)
+        memmove(last, first, (da->count - index) * da->info.size);
     memcpy(first, items, items_count * da->info.size);
     da->count += items_count;
 
@@ -202,8 +204,9 @@ da_error_t da_remove(da_t* da, size_t index) {
     char* removed = da_detail_at(da, index);
     if (da->info.dtor != NULL)
         da->info.dtor(removed);
-    memmove(removed, removed + da->info.size,
-        da->info.size * (da->count - index - 1));
+    if (index < da->count - 1)
+        memmove(removed, removed + da->info.size,
+            da->info.size * (da->count - index - 1));
     da->count -= 1;
 
     return dae_success;
@@ -221,7 +224,8 @@ da_error_t da_remove_many(da_t* da, size_t i, size_t j) {
     if (da->info.dtor != NULL)
         for (size_t k = i; k < j; k++)
             da->info.dtor(da_detail_at(da, k));
-    memmove(first, last, da->info.size * (da->count - j));
+    if (j < da->count)
+        memmove(first, last, da->info.size * (da->count - j));
     da->count -= j - i;
 
     return dae_success;

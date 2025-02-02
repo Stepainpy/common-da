@@ -47,6 +47,17 @@ DA_DEF const char* da_error_to_str(da_error_t error);
 #define DA_CREATE_VAR(name, type, dtor_ptr) \
 da_t name = {0}; name.info = DA_CREATE_TINFO(type, dtor_ptr)
 
+#define DA_FOREACH(type, fl_var, da_ptr) \
+    for ( type* fl_var = (type*)(da_ptr)->items; \
+    fl_var < (type*)(da_ptr)->items + (da_ptr)->count; \
+    ++fl_var )
+
+#define DA_VOID_FOREACH(fl_var, da_ptr)  \
+    for ( void* fl_var = (da_ptr)->items;  \
+    (char*)fl_var < (char*)(da_ptr)->items + \
+        (da_ptr)->count * (da_ptr)->info.size; \
+    fl_var = (char*)fl_var + (da_ptr)->info.size )
+
 // Function declarations
 
 // !!! Attention !!!

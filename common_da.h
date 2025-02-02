@@ -4,7 +4,7 @@
 
 #include <stddef.h>
 
-// Support macros for functions declaration
+// Macros for functions declaration
 #ifndef DA_DEF
 #define DA_DEF
 #endif
@@ -36,37 +36,68 @@ typedef enum {
     dae_type_size_overflow
 } da_error_t;
 
+/* Convert error code to readable text */
 DA_DEF const char* da_error_to_str(da_error_t error);
+
+// Support macros
 
 #define DA_CREATE_TINFO(type, dtor_ptr) \
 ((da_type_info_t){.size = sizeof(type), .dtor = (dtor_ptr)})
+
 #define DA_CREATE_VAR(name, type, dtor_ptr) \
 da_t name = {0}; name.info = DA_CREATE_TINFO(type, dtor_ptr)
 
-typedef const void* da_imm_t;
-
 // Function declarations
 
+// !!! Attention !!!
+// Use functions with suffix '_imm' only 
+// conditional 'info.size <= sizeof(da_imm_t)' is true
+typedef const void* da_imm_t;
+
+// Access to items
+/* Copy value of item by `index` to `out_item` */
 DA_DEF da_error_t da_at(da_t* da, void* out_item, size_t index);
+/* Copy value of first item to `out_item` */
 DA_DEF da_error_t da_front(da_t* da, void* out_item);
+/* Copy value of last item to `out_item` */
 DA_DEF da_error_t da_back(da_t* da, void* out_item);
-DA_DEF da_error_t da_push_back(da_t* da, const void* item);
-DA_DEF da_error_t da_push_back_many(da_t* da, const void* items, size_t items_count);
-DA_DEF void       da_clear(da_t* da);
-DA_DEF void       da_destroy(da_t* da);
+
+// Adding items
+/* Insert value into position by `index` from passed poiter */
 DA_DEF da_error_t da_insert(da_t* da, const void* item, size_t index);
-DA_DEF da_error_t da_insert_many(da_t* da, const void* items, size_t items_count, size_t index);
-DA_DEF da_error_t da_pop_back(da_t* da);
-DA_DEF da_error_t da_pop_back_many(da_t* da, size_t pop_count);
-DA_DEF da_error_t da_remove(da_t* da, size_t index);
-DA_DEF da_error_t da_remove_many(da_t* da, size_t i, size_t j);
-DA_DEF da_error_t da_reserve(da_t* da, size_t new_cap);
-DA_DEF da_error_t da_shrink_to_fit(da_t* da);
-
-// Use only conditional 'info.size <= sizeof(da_imm_t)' is true
-
-DA_DEF da_error_t da_push_back_imm(da_t* da, da_imm_t value);
+/* Insert value of the passed immediately type into position by `index` */
 DA_DEF da_error_t da_insert_imm(da_t* da, da_imm_t value, size_t index);
+/* Insert values into position by `index` from passed array */
+DA_DEF da_error_t da_insert_many(da_t* da, const void* items, size_t items_count, size_t index);
+/* Insert value to end from passed poiter */
+DA_DEF da_error_t da_push_back(da_t* da, const void* item);
+/* Insert value of the passed immediately type to end */
+DA_DEF da_error_t da_push_back_imm(da_t* da, da_imm_t value);
+/* Insert values to end from passed array */
+DA_DEF da_error_t da_push_back_many(da_t* da, const void* items, size_t items_count);
+
+// Removing items
+// If provided destructor, call before removing
+/* Remove item by `index` */
+DA_DEF da_error_t da_remove(da_t* da, size_t index);
+/* Remove items by indexs in range [`i`, `j`) */
+DA_DEF da_error_t da_remove_many(da_t* da, size_t i, size_t j);
+/* Remove the last item */
+DA_DEF da_error_t da_pop_back(da_t* da);
+/* Remove the `pop_count`-last items */
+DA_DEF da_error_t da_pop_back_many(da_t* da, size_t pop_count);
+
+// Deletion items
+/* Remove all item and save capacity */
+DA_DEF void da_clear(da_t* da);
+/* Remove all item and free memory */
+DA_DEF void da_destroy(da_t* da);
+
+// Capacity manipulation
+/* Reserve place for items greater or equal than `new_cap` */
+DA_DEF da_error_t da_reserve(da_t* da, size_t new_cap);
+/* Deallocate free capacity */
+DA_DEF da_error_t da_shrink_to_fit(da_t* da);
 
 #endif // COMMON_DA_H
 

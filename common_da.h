@@ -66,12 +66,12 @@ da_t name = {0}; name.info = DA_CREATE_TINFO(type, dtor_ptr)
 typedef const void* da_imm_t;
 
 // Access to items
-/* Copy value of item by `index` to `out_item` */
-DA_DEF da_error_t da_at(da_t* da, void* out_item, size_t index);
-/* Copy value of first item to `out_item` */
-DA_DEF da_error_t da_front(da_t* da, void* out_item);
-/* Copy value of last item to `out_item` */
-DA_DEF da_error_t da_back(da_t* da, void* out_item);
+/* Set pointer from `dest_ptr` as pointer to item by `index` */
+DA_DEF da_error_t da_at(da_t* da, void** dest_ptr, size_t index);
+/* Set pointer from `dest_ptr` as pointer to first item */
+DA_DEF da_error_t da_front(da_t* da, void** dest_ptr);
+/* Set pointer from `dest_ptr` as pointer to last item */
+DA_DEF da_error_t da_back(da_t* da, void** dest_ptr);
 
 // Adding items
 /* Insert value into position by `index` from passed poiter */
@@ -161,18 +161,18 @@ const char* da_error_to_str(da_error_t error) {
     }
 }
 
-da_error_t da_at(da_t* da, void* out_item, size_t index) {
+da_error_t da_at(da_t* da, void** dest_ptr, size_t index) {
     if (index >= da->count) return dae_out_of_range;
-    memcpy(out_item, da_detail_at(da, index), da->info.size);
+    *dest_ptr = da_detail_at(da, index);
     return dae_success;
 }
 
-da_error_t da_front(da_t* da, void* out_item) {
-    return da_at(da, out_item, 0);
+da_error_t da_front(da_t* da, void** dest_ptr) {
+    return da_at(da, dest_ptr, 0);
 }
 
-da_error_t da_back(da_t* da, void* out_item) {
-    return da_at(da, out_item, da->count - 1);
+da_error_t da_back(da_t* da, void** dest_ptr) {
+    return da_at(da, dest_ptr, da->count - 1);
 }
 
 da_error_t da_push_back(da_t* da, const void* item) {

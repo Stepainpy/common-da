@@ -284,10 +284,7 @@ da_error_t da_remove_many(da_t* da, size_t i, size_t j) {
 }
 
 da_error_t da_reserve(da_t* da, size_t new_cap) {
-    if (da->capacity >= new_cap)
-        return dae_success;
-    da->capacity = new_cap;
-    return da_detail_realloc(da);
+    return da_detail_has_n(da, new_cap);
 }
 
 da_error_t da_shrink_to_fit(da_t* da) {

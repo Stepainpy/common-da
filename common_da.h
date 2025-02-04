@@ -25,7 +25,7 @@ typedef struct {
     void* items;
     size_t count;
     size_t capacity;
-    da_type_info_t info;
+    const da_type_info_t info;
 } da_t;
 
 typedef enum {
@@ -41,11 +41,9 @@ DA_DEF const char* da_error_to_str(da_error_t error);
 
 // Support macros
 
-#define DA_CREATE_TINFO(type, dtor_ptr) \
-((da_type_info_t){.size = sizeof(type), .dtor = (dtor_ptr)})
-
 #define DA_CREATE_VAR(name, type, dtor_ptr) \
-da_t name = {0}; name.info = DA_CREATE_TINFO(type, dtor_ptr)
+da_t name = { .items = NULL, .count = 0, .capacity = 0, \
+    .info = { .size = sizeof(type), .dtor = (dtor_ptr) }}
 
 #define DA_FOREACH(type, fl_var, da_ptr) \
     for ( type* fl_var = (type*)(da_ptr)->items; \

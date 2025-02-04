@@ -6,20 +6,13 @@ Implementation dynamic array without depend the stored type. Object of type `da_
 
 ## Usage
 
-### Create new `da`
+### Creating and using `da`
 
 ``` c
-DA_CREATE_VAR(da, int, NULL);
-```
-or
-``` c
-da_t da = {0};
-da.info = DA_CREATE_TINFO(int, NULL);
-```
-or
-``` c
-da_t da = {0};
-da.info.size = sizeof(int);
+DA_CREATE_VAR(da, int, NULL); // place 'da' to stack
+/* ... some code ... */
+size_t length = da.count; // access to field
+da_some_func(&da, ...); 
 ```
 
 ### Access to items
@@ -59,6 +52,12 @@ da.info.size = sizeof(int);
 - `DA_IMPLEMENTATION` - add definition of functions
 - `DA_DEF` - User-provided attributes (as an example: `__declspec(dllexport)`)
 - `DA_INIT_CAP` - default start capacity for empty `da`
+
+## Provided macros
+
+- `DA_CREATE_VAR` - initialize new variable of type `da_t`
+- `DA_FOREACH` - expand to header (`for` with brackets) for for-loop and iterable by `da`
+- `DA_VOID_FOREACH` - as `DA_FOREACH`, but use `void *` iterator variable
 
 ## Example
 

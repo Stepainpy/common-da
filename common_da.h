@@ -65,11 +65,11 @@ typedef const void* da_imm_t;
 
 // Access to items
 /* Set pointer from `dest_ptr` as pointer to item by `index` */
-DA_DEF da_error_t da_at(da_t* da, void** dest_ptr, size_t index);
+DA_DEF da_error_t da_at(const da_t* da, void** dest_ptr, size_t index);
 /* Set pointer from `dest_ptr` as pointer to first item */
-DA_DEF da_error_t da_front(da_t* da, void** dest_ptr);
+DA_DEF da_error_t da_front(const da_t* da, void** dest_ptr);
 /* Set pointer from `dest_ptr` as pointer to last item */
-DA_DEF da_error_t da_back(da_t* da, void** dest_ptr);
+DA_DEF da_error_t da_back(const da_t* da, void** dest_ptr);
 
 // Adding items
 /* Insert value into position by `index` from passed poiter */
@@ -139,7 +139,7 @@ static da_error_t da_detail_has_n(da_t* da, size_t n) {
     return da_detail_realloc(da);
 }
 
-static void* da_detail_at(da_t* da, size_t index) {
+static void* da_detail_at(const da_t* da, size_t index) {
     return (char*)da->items + index * da->info.size;
 }
 
@@ -159,17 +159,17 @@ const char* da_error_to_str(da_error_t error) {
     }
 }
 
-da_error_t da_at(da_t* da, void** dest_ptr, size_t index) {
+da_error_t da_at(const da_t* da, void** dest_ptr, size_t index) {
     if (index >= da->count) return dae_out_of_range;
     *dest_ptr = da_detail_at(da, index);
     return dae_success;
 }
 
-da_error_t da_front(da_t* da, void** dest_ptr) {
+da_error_t da_front(const da_t* da, void** dest_ptr) {
     return da_at(da, dest_ptr, 0);
 }
 
-da_error_t da_back(da_t* da, void** dest_ptr) {
+da_error_t da_back(const da_t* da, void** dest_ptr) {
     return da_at(da, dest_ptr, da->count - 1);
 }
 

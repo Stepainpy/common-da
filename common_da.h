@@ -111,6 +111,7 @@ DA_DEF da_error_t da_shrink_to_fit(da_t* da);
 #endif // COMMON_DA_H
 
 #ifdef DA_IMPLEMENTATION
+#undef DA_IMPLEMENTATION
 
 #include <stdlib.h>
 #include <string.h>

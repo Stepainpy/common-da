@@ -17,6 +17,7 @@ DA_DEF dstring_t read_entry_file(const char* path);
 #endif // DA_STRING_H
 
 #ifdef DA_STRING_IMPLEMENTATION
+#undef DA_STRING_IMPLEMENTATION
 
 #include <string.h>
 #include <stdio.h>

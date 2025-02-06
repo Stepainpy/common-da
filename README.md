@@ -17,6 +17,7 @@ da_some_func(&da, ...);
 
 ### Access to items
 
+- `da_at_fwd` - get pointer to item by index as return value
 - `da_at` - get pointer to item by index
 - `da_front` - get pointer to first item
 - `da_back` - get pointer to last item

@@ -64,6 +64,8 @@ da_t name = { .items = NULL, .count = 0, .capacity = 0, \
 typedef const void* da_imm_t;
 
 // Access to items
+/* Return pointer to item by `index` without bounder check */
+DA_DEF void* da_at_fwd(const da_t* da, size_t index);
 /* Set pointer from `dest_ptr` as pointer to item by `index` */
 DA_DEF da_error_t da_at(const da_t* da, void** dest_ptr, size_t index);
 /* Set pointer from `dest_ptr` as pointer to first item */
@@ -140,11 +142,11 @@ static da_error_t da_detail_has_n(da_t* da, size_t n) {
     return da_detail_realloc(da);
 }
 
-static void* da_detail_at(const da_t* da, size_t index) {
+// General implementations
+
+void* da_at_fwd(const da_t* da, size_t index) {
     return (char*)da->items + index * da->info.size;
 }
-
-// General implementations
 
 const char* da_error_to_str(da_error_t error) {
     switch (error) {
@@ -162,7 +164,7 @@ const char* da_error_to_str(da_error_t error) {
 
 da_error_t da_at(const da_t* da, void** dest_ptr, size_t index) {
     if (index >= da->count) return dae_out_of_range;
-    *dest_ptr = da_detail_at(da, index);
+    *dest_ptr = da_at_fwd(da, index);
     return dae_success;
 }
 
@@ -189,7 +191,7 @@ da_error_t da_push_back_many(da_t* da, const void* items, size_t items_count) {
 void da_clear(da_t* da) {
     if (da->info.dtor != NULL)
         for (size_t i = 0; i < da->count; i++)
-            da->info.dtor(da_detail_at(da, i));
+            da->info.dtor(da_at_fwd(da, i));
     da->count = 0;
 }
 
@@ -206,7 +208,7 @@ da_error_t da_insert(da_t* da, const void* item, size_t index) {
     if (da_detail_has_one(da) == dae_no_memory)
         return dae_no_memory;
 
-    char* inserted = da_detail_at(da, index);
+    char* inserted = da_at_fwd(da, index);
     memmove(inserted + da->info.size, inserted,
         (da->count - index) * da->info.size);
     memcpy(inserted, item, da->info.size);
@@ -229,8 +231,8 @@ da_error_t da_insert_many(da_t* da, const void* items, size_t items_count, size_
     if (da_detail_has_n(da, items_count) == dae_no_memory)
         return dae_no_memory;
 
-    char* first = da_detail_at(da, index);
-    char* last  = da_detail_at(da, index + items_count);
+    char* first = da_at_fwd(da, index);
+    char* last  = da_at_fwd(da, index + items_count);
     memmove(last, first, (da->count - index) * da->info.size);
     memcpy(first, items, items_count * da->info.size);
     da->count += items_count;
@@ -250,7 +252,7 @@ da_error_t da_remove(da_t* da, size_t index) {
     if (index >= da->count)
         return dae_out_of_range;
 
-    char* removed = da_detail_at(da, index);
+    char* removed = da_at_fwd(da, index);
     if (da->info.dtor != NULL)
         da->info.dtor(removed);
     memmove(removed, removed + da->info.size,
@@ -267,11 +269,11 @@ da_error_t da_remove_many(da_t* da, size_t i, size_t j) {
     if (j - i == 0)
         return dae_success;
 
-    char* first = da_detail_at(da, i);
-    char* last  = da_detail_at(da, j);
+    char* first = da_at_fwd(da, i);
+    char* last  = da_at_fwd(da, j);
     if (da->info.dtor != NULL)
         for (size_t k = i; k < j; k++)
-            da->info.dtor(da_detail_at(da, k));
+            da->info.dtor(da_at_fwd(da, k));
     memmove(first, last, da->info.size * (da->count - j));
     da->count -= j - i;
 

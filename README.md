@@ -41,7 +41,7 @@ da_some_func(&da, ...);
 ### Deletion items
 
 - `da_clear` - remove all items and save capacity
-- `da_free` - remove all items and free allocated memory
+- `da_destroy` - remove all items and free allocated memory
 
 ### Capacity manipulation
 
